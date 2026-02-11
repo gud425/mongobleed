@@ -1,0 +1,58 @@
+version: '3.8'
+
+services:
+  mongodb-vulnerable:
+    image: mongo:8.2.2
+    container_name: mongobleed-target
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: id
+      MONGO_INITDB_ROOT_PASSWORD: pw
+      MONGO_INITDB_DATABASE: secretdb
+    volumes:
+      - ./init/init-mongo.js:/docker-entrypoint-initdb.d/init-mongo.js:ro
+      - mongodb_data:/data/db
+    entrypoint:
+      - /bin/bash
+      - -lc
+      - |
+        set -e
+        # start official entrypoint with passed args ($@ = mongod ...), in background
+        /usr/local/bin/docker-entrypoint.sh "$@" &
+        pid=$!
+        # wait for init to create data (flags)
+        until mongosh --quiet --host localhost -u gud425 -p 'PwForGud425!!@@' --authenticationDatabase admin --eval 'const s=db.getSiblingDB("secretdb"); quit(s.flags.countDocuments()>0?0:1)' >/dev/null 2>&1; do
+          echo "waiting for init..."
+          sleep 2
+        done
+        echo "starting heat loop"
+        while true; do
+          mongosh --quiet --host localhost -u gud425 -p 'PwForGud425!!@@' --authenticationDatabase admin --eval 'const s=db.getSiblingDB("secretdb"); s.flag_heap_4k.find({}, {payload:1, rf1:1, rf2:1, _id:0}).batchSize(0).toArray(); s.flag_heap_16k.find({}, {payload:1, rf1:1, rf2:1, _id:0}).batchSize(0).toArray(); s.flag_heap_64k.find({}, {payload:1, rf1:1, rf2:1, _id:0}).batchSize(0).toArray(); s.flag_heap_256k.find({}, {payload:1, rf1:1, rf2:1, _id:0}).batchSize(0).toArray();'
+          sleep 0.1
+        done
+        wait $pid
+    command:
+      - mongod
+      - --networkMessageCompressors
+      - zlib
+      - --bind_ip_all
+    restart: unless-stopped
+  php-web:
+    build:
+      context: .
+      dockerfile: Dockerfile.php-web
+    container_name: php-web
+    ports:
+      - "8282:80"
+    volumes:
+      - ./web:/var/www/html:rw
+    environment:
+      MONGODB_URI: mongodb://id:pw%40%40@mongobleed-target:27017/secretdb?authSource=admin
+      MONGODB_DB: secretdb
+      MONGODB_COLLECTION: rankings
+    depends_on:
+      - mongodb-vulnerable
+    restart: unless-stopped
+
+volumes:
+  mongodb_data:
+

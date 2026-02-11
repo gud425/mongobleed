@@ -1,0 +1,30 @@
+FROM php:apache
+
+# Install PHP MongoDB ext + Python 3 + pip, then install Python requirements
+COPY requirements.txt /requirements.txt
+RUN set -eux; \
+    apt-get update; \
+    apt-get install -y --no-install-recommends git pkg-config libssl-dev python3 python3-pip; \
+    pecl install mongodb; \
+    docker-php-ext-enable mongodb; \
+    pip3 install --no-cache-dir --break-system-packages -r /requirements.txt; \
+    apt-get purge -y --auto-remove git pkg-config; \
+    rm -rf /var/lib/apt/lists/*;
+
+# Provide exploit script inside the image for internal testing
+COPY exploit.py /usr/local/bin/exploit.py
+RUN chmod +x /usr/local/bin/exploit.py
+
+WORKDIR /var/www/html
+
+# Security hardening: minimize server identity and remove X-Powered-By
+RUN set -eux; \
+    a2enmod headers; \
+    sed -ri 's/^(ServerTokens)\s+.*/\1 Prod/i' /etc/apache2/conf-available/security.conf; \
+    sed -ri 's/^(ServerSignature)\s+.*/\1 Off/i' /etc/apache2/conf-available/security.conf; \
+    printf "Header always unset X-Powered-By\n" > /etc/apache2/conf-available/unset-php.conf; \
+    printf "Header always unset Server\n" > /etc/apache2/conf-available/unset-server.conf; \
+    a2enconf unset-php unset-server; \
+    echo 'expose_php=0' > /usr/local/etc/php/conf.d/zz-hardening.ini
+
+
