@@ -1,0 +1,1316 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>🏇 RAON COFFEE</title>
+    <link href="https://fonts.googleapis.com/css2?family=Black+Han+Sans&family=Noto+Sans+KR:wght@400;700;900&display=swap" rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        :root {
+            --primary: #FF3366;
+            --secondary: #FFD700;
+            --accent: #00D9FF;
+            --dark: #1a0033;
+            --light: #FFF5E6;
+            --track-bg: #2a5c3f;
+            --track-border: #8B4513;
+            --hill-color: #8B7355;
+            --downhill-color: #5C8A7D;
+        }
+
+        body {
+            font-family: 'Noto Sans KR', sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            overflow-x: hidden;
+        }
+
+        .container {
+            width: 95%;
+            max-width: 1600px;
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 30px;
+            box-shadow: 0 30px 80px rgba(0, 0, 0, 0.3);
+            padding: 40px;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .container::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 8px;
+            background: linear-gradient(90deg, var(--primary), var(--accent), var(--secondary), var(--primary));
+            background-size: 200% 100%;
+            animation: shimmer 3s linear infinite;
+        }
+
+        @keyframes shimmer {
+            0% { background-position: 200% 0; }
+            100% { background-position: -200% 0; }
+        }
+
+        h1 {
+            font-family: 'Black Han Sans', sans-serif;
+            font-size: 3.5em;
+            text-align: center;
+            background: linear-gradient(135deg, var(--primary), var(--accent));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            margin-bottom: 30px;
+            animation: pulse 2s ease-in-out infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.02); }
+        }
+
+        .setup-screen, .game-screen, .result-screen {
+            display: none;
+        }
+
+        .setup-screen.active, .game-screen.active, .result-screen.active {
+            display: block;
+        }
+
+        .setup-form {
+            max-width: 800px;
+            margin: 0 auto;
+        }
+
+        .form-group {
+            margin-bottom: 25px;
+        }
+
+        label {
+            display: block;
+            font-weight: 700;
+            margin-bottom: 10px;
+            color: var(--dark);
+            font-size: 1.1em;
+        }
+
+        input, select {
+            width: 100%;
+            padding: 15px;
+            border: 3px solid var(--accent);
+            border-radius: 15px;
+            font-size: 1em;
+            font-family: 'Noto Sans KR', sans-serif;
+            transition: all 0.3s;
+        }
+
+        input:focus, select:focus {
+            outline: none;
+            border-color: var(--primary);
+            transform: translateY(-2px);
+            box-shadow: 0 5px 20px rgba(255, 51, 102, 0.3);
+        }
+
+        .horse-inputs {
+            margin-top: 20px;
+        }
+
+        .horse-input-group {
+            display: flex;
+            align-items: center;
+            margin-bottom: 15px;
+            gap: 10px;
+            background: linear-gradient(135deg, rgba(255,255,255,0.9), rgba(240,240,255,0.9));
+            padding: 15px;
+            border-radius: 15px;
+            box-shadow: 0 3px 10px rgba(0,0,0,0.1);
+        }
+
+        .horse-emoji {
+            font-size: 2em;
+            width: 50px;
+            text-align: center;
+        }
+
+        .horse-input-group input {
+            flex: 1;
+        }
+
+        .loser-checkbox-wrapper {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            padding: 8px 15px;
+            background: linear-gradient(135deg, rgba(255, 215, 0, 0.2), rgba(255, 165, 0, 0.2));
+            border: 2px solid var(--secondary);
+            border-radius: 10px;
+            cursor: pointer;
+            transition: all 0.3s;
+            white-space: nowrap;
+        }
+
+        .loser-checkbox-wrapper:hover {
+            background: linear-gradient(135deg, rgba(255, 215, 0, 0.3), rgba(255, 165, 0, 0.3));
+            transform: scale(1.05);
+        }
+
+        .loser-checkbox-wrapper input[type="checkbox"] {
+            width: 20px;
+            height: 20px;
+            cursor: pointer;
+            accent-color: var(--secondary);
+        }
+
+        .loser-checkbox-wrapper label {
+            margin: 0;
+            font-size: 0.9em;
+            font-weight: 700;
+            color: #CC8800;
+            cursor: pointer;
+        }
+
+        .btn {
+            background: linear-gradient(135deg, var(--primary), #FF6B9D);
+            color: white;
+            border: none;
+            padding: 18px 50px;
+            font-size: 1.3em;
+            font-weight: 900;
+            border-radius: 50px;
+            cursor: pointer;
+            font-family: 'Black Han Sans', sans-serif;
+            box-shadow: 0 10px 30px rgba(255, 51, 102, 0.4);
+            transition: all 0.3s;
+            display: block;
+            margin: 30px auto;
+        }
+
+        .btn:hover {
+            transform: translateY(-3px) scale(1.05);
+            box-shadow: 0 15px 40px rgba(255, 51, 102, 0.6);
+        }
+
+        .track-container {
+            position: relative;
+            width: 100%;
+            height: 750px;
+            margin: 30px auto;
+            background: var(--track-bg);
+            border: 10px solid var(--track-border);
+            border-radius: 20px;
+            box-shadow: inset 0 0 50px rgba(0, 0, 0, 0.5);
+            overflow: hidden;
+        }
+
+        .terrain {
+            position: absolute;
+            z-index: 1;
+            opacity: 0.7;
+        }
+
+        .terrain.hill {
+            background: repeating-linear-gradient(
+                45deg,
+                var(--hill-color),
+                var(--hill-color) 10px,
+                #A0826D 10px,
+                #A0826D 20px
+            );
+            border: 3px solid #6B5444;
+            border-radius: 10px;
+        }
+
+        .terrain.downhill {
+            background: repeating-linear-gradient(
+                -45deg,
+                var(--downhill-color),
+                var(--downhill-color) 10px,
+                #4A7C70 10px,
+                #4A7C70 20px
+            );
+            border: 3px solid #3A5C50;
+            border-radius: 10px;
+        }
+
+        .terrain-label {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            font-weight: 900;
+            font-size: 1.5em;
+            color: white;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.5);
+            pointer-events: none;
+        }
+
+        .track {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 90%;
+            height: 85%;
+            border: 8px dashed rgba(255, 255, 255, 0.5);
+            border-radius: 10px;
+            z-index: 2;
+        }
+
+        .finish-line {
+            position: absolute;
+            top: 10px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 120px;
+            height: 10px;
+            background: repeating-linear-gradient(
+                90deg,
+                white 0px,
+                white 10px,
+                black 10px,
+                black 20px
+            );
+            border-radius: 5px;
+            z-index: 10;
+            box-shadow: 0 0 30px rgba(255, 215, 0, 0.9);
+        }
+
+        .horse {
+            position: absolute;
+            font-size: 2.5em;
+            transition: all 0.2s ease-out;
+            z-index: 5;
+            filter: drop-shadow(3px 3px 5px rgba(0, 0, 0, 0.3));
+        }
+
+        .stamina-bar {
+            position: absolute;
+            top: -35px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 80px;
+            height: 6px;
+            background: rgba(0, 0, 0, 0.3);
+            border-radius: 3px;
+            overflow: hidden;
+            font-size: 0.3em;
+        }
+
+        .stamina-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #4CAF50, #8BC34A);
+            transition: width 0.3s, background 0.3s;
+        }
+
+        .stamina-fill.low {
+            background: linear-gradient(90deg, #FF9800, #FFC107);
+        }
+
+        .stamina-fill.critical {
+            background: linear-gradient(90deg, #F44336, #E91E63);
+            animation: pulse-stamina 0.5s ease-in-out infinite;
+        }
+
+        @keyframes pulse-stamina {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.6; }
+        }
+
+        .horse-info {
+            position: absolute;
+            background: rgba(255, 255, 255, 0.95);
+            padding: 5px 12px;
+            border-radius: 20px;
+            font-weight: 700;
+            font-size: 0.35em;
+            white-space: nowrap;
+            top: -20px;
+            left: 50%;
+            transform: translateX(-50%);
+            box-shadow: 0 3px 10px rgba(0, 0, 0, 0.2);
+            border: 2px solid var(--accent);
+        }
+
+        .strategy-badge {
+            display: inline-block;
+            padding: 2px 8px;
+            border-radius: 10px;
+            font-size: 0.8em;
+            margin-left: 5px;
+        }
+
+        .strategy-도주 {
+            background: linear-gradient(135deg, #FF6B6B, #FF8E53);
+            color: white;
+        }
+
+        .strategy-선행 {
+            background: linear-gradient(135deg, #FFB347, #FFCC33);
+            color: white;
+        }
+
+        .strategy-선입 {
+            background: linear-gradient(135deg, #4ECDC4, #44A08D);
+            color: white;
+        }
+
+        .strategy-추입 {
+            background: linear-gradient(135deg, #F38181, #AA076B);
+            color: white;
+        }
+
+        .rank-indicator {
+            position: absolute;
+            bottom: -25px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: var(--secondary);
+            color: var(--dark);
+            padding: 3px 10px;
+            border-radius: 15px;
+            font-size: 0.4em;
+            font-weight: 900;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.3);
+        }
+
+        .effect-popup {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background: linear-gradient(135deg, var(--primary), var(--accent));
+            color: white;
+            padding: 30px 60px;
+            border-radius: 25px;
+            font-size: 2em;
+            font-weight: 900;
+            font-family: 'Black Han Sans', sans-serif;
+            z-index: 1000;
+            animation: effectPopup 1.5s ease-out forwards;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.4);
+        }
+
+        @keyframes effectPopup {
+            0% {
+                transform: translate(-50%, -50%) scale(0) rotate(-180deg);
+                opacity: 0;
+            }
+            50% {
+                transform: translate(-50%, -50%) scale(1.2) rotate(10deg);
+                opacity: 1;
+            }
+            100% {
+                transform: translate(-50%, -50%) scale(0) rotate(180deg);
+                opacity: 0;
+            }
+        }
+
+        .controls {
+            text-align: center;
+            margin: 20px 0;
+        }
+
+        .speed-control {
+            display: inline-flex;
+            align-items: center;
+            gap: 15px;
+            background: rgba(255, 255, 255, 0.9);
+            padding: 15px 30px;
+            border-radius: 50px;
+            box-shadow: 0 5px 20px rgba(0, 0, 0, 0.1);
+        }
+
+        .speed-value {
+            font-weight: 900;
+            font-size: 1.2em;
+            color: var(--primary);
+            min-width: 80px;
+            text-align: center;
+        }
+        
+        .speed-indicator {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            background: rgba(255, 51, 102, 0.95);
+            color: white;
+            padding: 15px 30px;
+            border-radius: 20px;
+            font-weight: 900;
+            font-size: 1.5em;
+            z-index: 1000;
+            box-shadow: 0 5px 20px rgba(0, 0, 0, 0.3);
+            animation: pulse 2s ease-in-out infinite;
+        }
+
+        .result-screen {
+            text-align: center;
+        }
+
+        .loser-announcement {
+            background: linear-gradient(135deg, #FF3366, #FF6B9D);
+            color: white;
+            padding: 40px;
+            border-radius: 25px;
+            margin: 40px 0;
+            box-shadow: 0 15px 40px rgba(255, 51, 102, 0.4);
+        }
+
+        .loser-emoji {
+            font-size: 5em;
+            animation: shake 0.5s ease-in-out infinite;
+        }
+
+        @keyframes shake {
+            0%, 100% { transform: rotate(-5deg); }
+            50% { transform: rotate(5deg); }
+        }
+
+        .ranking-list {
+            max-width: 600px;
+            margin: 30px auto;
+            background: white;
+            padding: 30px;
+            border-radius: 20px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+        }
+
+        .ranking-item {
+            display: flex;
+            align-items: center;
+            gap: 20px;
+            padding: 15px;
+            margin: 10px 0;
+            background: linear-gradient(135deg, #f8f9fa, #e9ecef);
+            border-radius: 15px;
+            font-weight: 700;
+            transition: all 0.3s;
+        }
+
+        .ranking-item:last-child {
+            background: linear-gradient(135deg, #FFE5E5, #FFD5D5);
+            border: 3px solid var(--primary);
+            transform: scale(1.05);
+        }
+
+        .ranking-item:hover {
+            transform: translateX(5px);
+        }
+
+        .rank-number-result {
+            font-size: 2em;
+            width: 50px;
+            text-align: center;
+        }
+
+        .info-panel {
+            background: rgba(255, 255, 255, 0.9);
+            padding: 20px;
+            border-radius: 15px;
+            margin-bottom: 20px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+        }
+
+        .strategy-info {
+            display: flex;
+            justify-content: space-around;
+            flex-wrap: wrap;
+            gap: 15px;
+            margin-top: 15px;
+        }
+
+        .strategy-card {
+            flex: 1;
+            min-width: 200px;
+            padding: 15px;
+            border-radius: 12px;
+            border: 2px solid #ddd;
+        }
+
+        @keyframes speed-boost {
+            0%, 100% { transform: scale(1); filter: brightness(1); }
+            50% { transform: scale(1.3); filter: brightness(1.5) hue-rotate(45deg); }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- 설정 화면 -->
+        <div class="setup-screen active">
+            <h1>🏇 RAON COFFEE 🍜</h1>
+            
+            <div class="info-panel">
+                <h3 style="margin-bottom: 15px;">📋 우마무스메 고증 시스템 (밸런스 조정판)</h3>
+                <p style="line-height: 1.8;">
+                    • <strong>도주(逃げ)</strong>: 초반 최선두, 스태미나 소모 많음 (1.1배)<br>
+                    • <strong>선행(先行)</strong>: 도주 견제, 스태미나 소모 약간 (1.05배), 종반 가속<br>
+                    • <strong>선입(差し)</strong>: 중위권 유지, 스태미나 보통 (1.0배), <strong>최종 직선 폭발!</strong><br>
+                    • <strong>추입(追込)</strong>: 최후방 힘 아낌, 스태미나 절약 (0.9배), 막판 강함<br>
+                    • <strong>도주마 2마 이상</strong>이면 서로 경쟁하며 페이스 상승!<br>
+                    • <strong>꼴등</strong>이 커피를 삽니다! 💸
+                </p>
+                
+                <div class="strategy-info">
+                    <div class="strategy-card">
+                        <strong>🔥 도주 (선두)</strong><br>
+                        <small>스태미나 소모 1.1배</small>
+                    </div>
+                    <div class="strategy-card">
+                        <strong>⚡ 선행 (선두권)</strong><br>
+                        <small>스태미나 소모 1.05배</small>
+                    </div>
+                    <div class="strategy-card">
+                        <strong>🌟 선입 (중위권)</strong><br>
+                        <small>기준 1.0배, 최종 직선 폭발!</small>
+                    </div>
+                    <div class="strategy-card">
+                        <strong>🚀 추입 (후위)</strong><br>
+                        <small>스태미나 절약 0.9배</small>
+                    </div>
+                </div>
+            </div>
+
+            <div class="setup-form">
+                <div class="form-group">
+                    <label for="playerCount">참가자 수 (2-20명)</label>
+                    <input type="number" id="playerCount" min="2" max="20" value="4" placeholder="참가자 수 입력">
+                </div>
+                
+                <div class="horse-inputs" id="horseInputs"></div>
+                <button class="btn" onclick="startGame()">🎮 경기 시작!</button>
+            </div>
+        </div>
+
+        <!-- 게임 화면 -->
+        <div class="game-screen">
+            <h1>🏁 경주 진행중...</h1>
+            <div class="controls">
+                <div class="speed-control">
+                    <span>🐌 느리게</span>
+                    <input type="range" id="speedControl" min="0.1" max="20" step="0.1" value="3">
+                    <span class="speed-value" id="speedValue">3x</span>
+                    <span>초고속 🚀</span>
+                </div>
+            </div>
+            <div class="speed-indicator" id="speedIndicator">속도: 3.0x</div>
+            <div class="track-container">
+                <div class="finish-line"></div>
+                <div id="terrains"></div>
+                <div class="track"></div>
+                <div id="horses"></div>
+            </div>
+        </div>
+
+        <!-- 결과 화면 -->
+        <div class="result-screen">
+            <h1>🏆 경기 결과</h1>
+            <div class="loser-announcement">
+                <div class="loser-emoji" id="loserEmoji">😭</div>
+                <h2 style="font-size: 2.5em; margin: 20px 0;">꼴등!</h2>
+                <h3 id="loserNameResult" style="font-size: 2em;">???</h3>
+                <p style="font-size: 1.3em; margin-top: 20px;">오늘 커피는 이사람! 💸</p>
+            </div>
+            
+            <div class="ranking-list" id="rankingList"></div>
+            
+            <button class="btn" onclick="resetGame()">🔄 다시 하기</button>
+        </div>
+    </div>
+
+    <script>
+        // 🔒 XSS 방지 함수
+        function escapeHtml(text) {
+            const map = {
+                '&': '&amp;',
+                '<': '&lt;',
+                '>': '&gt;',
+                '"': '&quot;',
+                "'": '&#039;',
+                '/': '&#x2F;'
+            };
+            return String(text).replace(/[&<>"'/]/g, m => map[m]);
+        }
+
+        // 🔒 안전한 텍스트 설정
+        function safeSetText(element, text) {
+            if (element) {
+                element.textContent = String(text);
+            }
+        }
+
+        const horseEmojis = ['🐴', '🦄', '🏇', '🐎', '🦓', '🎠', '🐑', '🦒', '🚗', '🐆','🚓', '🐏', '🐐', '🦌', '🦙', '🦘', '🐫', '🐪', '🦒', '🦬'];
+        const colors = ['#FF3366', '#00D9FF', '#FFD700', '#9D4EDD', '#06D6A0', '#FF6B6B', '#4ECDC4', '#FF8B94', '#A8E6CF', '#FFB6C1','#8B00FF', '#FF1493', '#00CED1', '#FF6347', '#32CD32','#FFD700', '#DC143C', '#00BFFF', '#FF69B4', '#7FFF00'];
+        
+        const strategies = {
+            '도주': {
+                name: '도주 (선두)',
+                earlySpeed: 1.3,
+                midSpeed: 1.2,
+                midLateSpeed: 1.0,
+                lateSpeed: 0.85,
+                finalStraightSpeed: 0.9,
+                staminaDrainMultiplier: 1.05,
+                description: '초반 선두, 막판 실속'
+            },
+            '선행': {
+                name: '선행 (선두권)',
+                earlySpeed: 1.1,
+                midSpeed: 1.0,
+                midLateSpeed: 1.15,
+                lateSpeed: 1.3,
+                finalStraightSpeed: 1.2,
+                staminaDrainMultiplier: 1.02,
+                description: '도주 견제, 종반 가속'
+            },
+            '선입': {
+                name: '선입 (중위권)',
+                earlySpeed: 0.9,
+                midSpeed: 0.95,
+                midLateSpeed: 1.1,
+                lateSpeed: 1.4,
+                finalStraightSpeed: 1.8,
+                staminaDrainMultiplier: 0.98,
+                description: '최종 직선 폭발력 최강'
+            },
+            '추입': {
+                name: '추입 (후위)',
+                earlySpeed: 0.75,
+                midSpeed: 0.85,
+                midLateSpeed: 1.2,
+                lateSpeed: 1.5,
+                finalStraightSpeed: 1.6,
+                staminaDrainMultiplier: 0.95,
+                description: '스태미나 절약, 막판 강함'
+            }
+        };
+
+        let horses = [];
+        let gameInterval;
+        let gameSpeed = 3;
+        let terrainZones = [];
+
+        const effects = [
+            { name: '🏃 앞장서기', speedMultiplier: 2.3, duration: 1600, probability: 0.12, type: 'speed', requiredStrategy: '도주' },
+            { name: '⚡ 컨센트레이션', speedMultiplier: 2.1, duration: 1500, probability: 0.13, type: 'speed', requiredStrategy: '도주' },
+            { name: '⭐ 탈출술', speedMultiplier: 2.5, duration: 1400, probability: 0.10, type: 'speed', requiredStrategy: '도주' },
+            { name: '🎯 앵글링×스키밍', speedMultiplier: 2.7, duration: 1300, probability: 0.09, type: 'speed', requiredStrategy: '도주' },
+            { name: '🔴 선행 직선', speedMultiplier: 2.4, duration: 1500, probability: 0.10, type: 'speed', requiredStrategy: '선행' },
+            { name: '🌟 호선의 프로페서', speedMultiplier: 2.2, duration: 1700, probability: 0.11, type: 'speed', requiredStrategy: '선행' },
+            { name: '🔵 종반 가속', speedMultiplier: 2.5, duration: 1400, probability: 0.09, type: 'speed', requiredStrategy: '선행' },
+            { name: '⚔️ 강공책', speedMultiplier: 3.0, duration: 1300, probability: 0.11, type: 'speed', requiredStrategy: '선입', reduceStaminaPenalty: 0.5 },
+            { name: '💪 십만마력', speedMultiplier: 2.8, duration: 1400, probability: 0.10, type: 'speed', requiredStrategy: '선입', reduceStaminaPenalty: 0.5 },
+            { name: '🎪 선입 직선', speedMultiplier: 2.9, duration: 1300, probability: 0.10, type: 'speed', requiredStrategy: '선입', reduceStaminaPenalty: 0.6 },
+            { name: '🌈 품행방정', speedMultiplier: 2.7, duration: 1500, probability: 0.09, type: 'speed', requiredStrategy: '선입', reduceStaminaPenalty: 0.5 },
+            { name: '💫 추입 직선', speedMultiplier: 3.1, duration: 1200, probability: 0.10, type: 'speed', requiredStrategy: '추입', ignoreStaminaPenalty: true },
+            { name: '⚡ 육박하는 그림자', speedMultiplier: 3.3, duration: 1100, probability: 0.09, type: 'speed', requiredStrategy: '추입', ignoreStaminaPenalty: true },
+            { name: '🌊 강공책(추입)', speedMultiplier: 3.2, duration: 1200, probability: 0.09, type: 'speed', requiredStrategy: '추입', ignoreStaminaPenalty: true },
+            { name: '🔥 이른 작전', speedMultiplier: 2.9, duration: 1300, probability: 0.10, type: 'speed', requiredStrategy: '추입', ignoreStaminaPenalty: true },
+            { name: '🔥 페이스 업', speedMultiplier: 2.0, duration: 1800, probability: 0.08, type: 'speed' },
+            { name: '💨 일진광풍', speedMultiplier: 2.4, duration: 1400, probability: 0.07, type: 'speed' },
+            { name: '🌪️ 코너 회복◎', speedMultiplier: 1.9, duration: 2000, probability: 0.09, type: 'speed' },
+            { name: '⚔️ 직선 일기', speedMultiplier: 2.5, duration: 1300, probability: 0.07, type: 'speed' },
+            { name: '✨ 전심전력', speedMultiplier: 2.8, duration: 1100, probability: 0.06, type: 'speed', ignoreStaminaPenalty: true },
+            { name: '💚 원호의 마에스트로', staminaRecover: 30, probability: 0.10, type: 'stamina' },
+            { name: '💙 호흡 정돈', staminaRecover: 22, probability: 0.12, type: 'stamina' },
+            { name: '🍀 하굣길의 즐거움', staminaRecover: 24, probability: 0.11, type: 'stamina' },
+            { name: '🌿 등교전 스트레치', staminaRecover: 18, probability: 0.13, type: 'stamina' }
+        ];
+
+        document.getElementById('playerCount').addEventListener('input', function() {
+            const count = parseInt(this.value) || 4;
+            generateHorseInputs(Math.max(2, Math.min(20, count)));
+        });
+
+        // 🔥 속도 조절 범위 확대 (0.1x ~ 20x) + 검증 로그
+        document.getElementById('speedControl').addEventListener('input', function() {
+            const oldSpeed = gameSpeed;
+            gameSpeed = parseFloat(this.value);
+            
+            // 실시간 표시 업데이트
+            safeSetText(document.getElementById('speedValue'), gameSpeed.toFixed(1) + 'x');
+            
+            const indicator = document.getElementById('speedIndicator');
+            if (indicator) {
+                safeSetText(indicator, '속도: ' + gameSpeed.toFixed(1) + 'x');
+                
+                // 속도에 따라 색상 변경
+                if (gameSpeed < 0.5) {
+                    indicator.style.background = 'rgba(100, 100, 255, 0.95)'; // 파랑 (슬로우)
+                } else if (gameSpeed < 2) {
+                    indicator.style.background = 'rgba(255, 51, 102, 0.95)'; // 빨강 (보통)
+                } else if (gameSpeed < 5) {
+                    indicator.style.background = 'rgba(255, 165, 0, 0.95)'; // 주황 (빠름)
+                } else {
+                    indicator.style.background = 'rgba(255, 0, 255, 0.95)'; // 보라 (초고속)
+                }
+            }
+            
+            // 🔍 검증 로그
+            console.log(`🎮 [속도 변경] ${oldSpeed.toFixed(1)}x → ${gameSpeed.toFixed(1)}x`);
+        });
+
+        generateHorseInputs(4);
+
+        function toggleCheckbox(index) {
+            const checkbox = document.getElementById(`loser${index}`);
+            checkbox.checked = !checkbox.checked;
+        }
+
+        function generateHorseInputs(count) {
+            const container = document.getElementById('horseInputs');
+            container.innerHTML = '';
+            
+            for (let i = 0; i < count; i++) {
+                const div = document.createElement('div');
+                div.className = 'horse-input-group';
+                div.id = `horse-group-${i}`;
+                
+                div.innerHTML = `
+                    <span class="horse-emoji">${horseEmojis[i]}</span>
+                    <input type="text" id="horse${i}" placeholder="${i + 1}번 말 이름" value="${i + 1}번 말" maxlength="20">
+                    <span style="font-size: 0.9em; color: #888; min-width: 130px;">각질: 랜덤</span>
+                    <div class="loser-checkbox-wrapper" onclick="toggleCheckbox(${i})">
+                        <input type="checkbox" id="loser${i}" onclick="event.stopPropagation()">
+                        <label for="loser${i}">꼴등 버프 🎁</label>
+                    </div>
+                `;
+                container.appendChild(div);
+            }
+        }
+
+        function startGame() {
+            const playerCount = parseInt(document.getElementById('playerCount').value) || 4;
+            horses = [];
+            
+            console.log(`🎮 [게임 시작] 참가자: ${playerCount}명 | 현재 속도: ${gameSpeed.toFixed(1)}x`);
+            
+            for (let i = 0; i < playerCount; i++) {
+                // 🔒 XSS 방지: 입력값 필터링 및 길이 제한
+                const rawName = document.getElementById(`horse${i}`).value.trim();
+                const safeName = escapeHtml(rawName.slice(0, 20)) || `${i + 1}번 말`;
+                
+                const strategyKeys = Object.keys(strategies);
+                const randomStrategyKey = strategyKeys[Math.floor(Math.random() * strategyKeys.length)];
+                const strategy = strategies[randomStrategyKey];
+                
+                const isLoser = document.getElementById(`loser${i}`)?.checked || false;
+                
+                horses.push({
+                    id: i,
+                    name: safeName,
+                    emoji: horseEmojis[i],
+                    color: colors[i],
+                    strategy: strategy,
+                    strategyKey: randomStrategyKey,
+                    progress: 0,
+                    position: { x: 50, y: 50 },
+                    baseSpeed: 0.8 + Math.random() * 0.4,
+                    stamina: 120,
+                    maxStamina: 120,
+                    staminaDrain: 0.8 + Math.random() * 0.4,
+                    power: 0.6 + Math.random() * 0.4,
+                    guts: 0.5 + Math.random() * 0.5,
+                    intelligence: 0.5 + Math.random() * 0.5,
+                    finished: false,
+                    rank: 0,
+                    effect: null,
+                    isLastLoser: isLoser,
+                    effectProbabilityMultiplier: isLoser ? 2 : 1,
+                    inFinalStraight: false
+                });
+            }
+
+            document.querySelector('.setup-screen').classList.remove('active');
+            document.querySelector('.game-screen').classList.add('active');
+            
+            initializeTrack();
+            createTerrains();
+            startRace();
+        }
+
+        function createTerrains() {
+            const terrainsContainer = document.getElementById('terrains');
+            terrainsContainer.innerHTML = '';
+            terrainZones = [];
+            
+            const trackContainer = document.querySelector('.track-container');
+            const trackWidth = trackContainer.offsetWidth - 100;
+            const trackHeight = trackContainer.offsetHeight - 100;
+            const perimeter = (trackWidth + trackHeight) * 2;
+            
+            const downhill = {
+                start: perimeter * 0.15,
+                end: perimeter * 0.25,
+                type: 'downhill',
+                multiplier: 1.5
+            };
+            
+            const hill = {
+                start: perimeter * 0.65,
+                end: perimeter * 0.75,
+                type: 'hill',
+                multiplier: 0.65
+            };
+            
+            terrainZones = [downhill, hill];
+            
+            terrainZones.forEach(zone => {
+                const div = document.createElement('div');
+                div.className = `terrain ${zone.type}`;
+                
+                const startPos = getPositionFromProgress(zone.start, trackWidth, trackHeight);
+                const endPos = getPositionFromProgress(zone.end, trackWidth, trackHeight);
+                
+                const width = Math.abs(endPos.x - startPos.x) || 80;
+                const height = Math.abs(endPos.y - startPos.y) || 80;
+                
+                div.style.left = Math.min(startPos.x, endPos.x) + 'px';
+                div.style.top = Math.min(startPos.y, endPos.y) + 'px';
+                div.style.width = Math.max(width, 50) + 'px';
+                div.style.height = Math.max(height, 50) + 'px';
+                
+                const label = document.createElement('div');
+                label.className = 'terrain-label';
+                safeSetText(label, zone.type === 'hill' ? '⛰️' : '🏔️↓');
+                div.appendChild(label);
+                
+                terrainsContainer.appendChild(div);
+            });
+        }
+
+        function getPositionFromProgress(progress, trackWidth, trackHeight) {
+            const perimeter = (trackWidth + trackHeight) * 2;
+            const position = progress % perimeter;
+            let x, y;
+            
+            if (position < trackWidth) {
+                x = 50 + position;
+                y = 50;
+            } else if (position < trackWidth + trackHeight) {
+                x = 50 + trackWidth;
+                y = 50 + (position - trackWidth);
+            } else if (position < trackWidth * 2 + trackHeight) {
+                x = 50 + trackWidth - (position - trackWidth - trackHeight);
+                y = 50 + trackHeight;
+            } else {
+                x = 50;
+                y = 50 + trackHeight - (position - trackWidth * 2 - trackHeight);
+            }
+            
+            return { x, y };
+        }
+
+        function initializeTrack() {
+            const horsesContainer = document.getElementById('horses');
+            horsesContainer.innerHTML = '';
+            
+            const trackContainer = document.querySelector('.track-container');
+            const trackWidth = trackContainer.offsetWidth - 100;
+            const trackHeight = trackContainer.offsetHeight - 100;
+            
+            horses.forEach((horse, index) => {
+                const horseEl = document.createElement('div');
+                horseEl.className = 'horse';
+                horseEl.id = `horse-${horse.id}`;
+                
+                // 🔒 안전한 HTML 생성
+                const horseInfo = document.createElement('div');
+                horseInfo.className = 'horse-info';
+                horseInfo.style.background = horse.color;
+                horseInfo.style.color = 'white';
+                
+                const nameSpan = document.createElement('span');
+                safeSetText(nameSpan, horse.name);
+                
+                const strategySpan = document.createElement('span');
+                strategySpan.className = `strategy-badge strategy-${horse.strategyKey}`;
+                safeSetText(strategySpan, horse.strategyKey);
+                
+                horseInfo.appendChild(nameSpan);
+                horseInfo.appendChild(strategySpan);
+                
+                if (horse.isLastLoser) {
+                    const giftSpan = document.createElement('span');
+                    safeSetText(giftSpan, ' 🎁');
+                    horseInfo.appendChild(giftSpan);
+                }
+                
+                horseEl.innerHTML = `
+                    ${horse.emoji}
+                    <div class="stamina-bar">
+                        <div class="stamina-fill" id="stamina-${horse.id}" style="width: 100%"></div>
+                    </div>
+                    <div class="rank-indicator">-위</div>
+                `;
+                
+                horseEl.insertBefore(horseInfo, horseEl.lastElementChild);
+                
+                const startY = 50 + (index * (trackHeight / horses.length));
+                horseEl.style.left = '50px';
+                horseEl.style.top = startY + 'px';
+                
+                horse.position = { x: 50, y: startY };
+                horsesContainer.appendChild(horseEl);
+            });
+        }
+
+        function startRace() {
+            let finishedCount = 0;
+            let frameCount = 0; // 프레임 카운터
+            
+            const escapeHorses = horses.filter(h => h.strategyKey === '도주');
+            const hasTwoEscape = escapeHorses.length >= 2;
+            
+            if (hasTwoEscape) {
+                console.log('🔥 도주마 2마 이상! 페이스 약간 상승');
+            }
+            
+            console.log(`🏁 [레이스 시작] 초기 속도: ${gameSpeed.toFixed(1)}x`);
+            
+            gameInterval = setInterval(() => {
+                frameCount++;
+                
+                // 🔍 100프레임마다 속도 검증 로그
+                if (frameCount % 100 === 0) {
+                    console.log(`⏱️ [프레임 ${frameCount}] 현재 속도: ${gameSpeed.toFixed(1)}x | 완주: ${finishedCount}/${horses.length}`);
+                }
+                
+                const trackContainer = document.querySelector('.track-container');
+                const trackWidth = trackContainer.offsetWidth - 100;
+                const trackHeight = trackContainer.offsetHeight - 100;
+                const perimeter = (trackWidth + trackHeight) * 2;
+                
+                horses.forEach(horse => {
+                    if (horse.finished) return;
+                    
+                    let drain = horse.staminaDrain * (1 + horse.baseSpeed * 0.5)*gameSpeed * 0.05;
+                    drain *= horse.strategy.staminaDrainMultiplier;
+                    
+                    if (hasTwoEscape && horse.strategyKey === '도주') {
+                        drain *= 1.08;
+                    }
+                    
+                    const raceProgress = horse.progress / perimeter;
+                    
+                    const nearbyHorses = horses.filter(h => {
+                        if (h.id === horse.id) return false;
+                        const dist = Math.sqrt(
+                            Math.pow(h.position.x - horse.position.x, 2) +
+                            Math.pow(h.position.y - horse.position.y, 2)
+                        );
+                        return dist < 60;
+                    });
+                    
+                    let crowdPenalty = 1.0;
+                    if (nearbyHorses.length >= 3) {
+                        crowdPenalty = 0.7;
+                        drain *= 1.1;
+                    } else if (nearbyHorses.length >= 2) {
+                        crowdPenalty = 0.85;
+                    }
+                    
+                    if (horse.effect && horse.effect.speedMultiplier) {
+                        drain *= 1.5;
+                    }
+                    
+                    horse.stamina = Math.max(0, horse.stamina - drain);
+                    
+                    // 🔥 스태미나 페널티 (배속에 따라 완화)
+                    let staminaPenalty = 1.0;
+                    const staminaPercent = (horse.stamina / horse.maxStamina) * 100;
+                    
+                    // 기본 페널티 계산
+                    let basePenalty = 1.0;
+                    if (staminaPercent < 10) {
+                        basePenalty = 0.2 + (staminaPercent / 50);  // 0.2 ~ 0.4
+                    } else if (staminaPercent < 30) {
+                        basePenalty = 0.4 + (staminaPercent / 50);  // 0.4 ~ 1.0
+                    } else if (staminaPercent < 50) {
+                        basePenalty = 0.7 + (staminaPercent / 166); // 0.7 ~ 1.0
+                    }
+                    
+                    // 🚀 배속이 높을수록 페널티 완화 (관람 편의성)
+                    // gameSpeed 1x: 페널티 100% 적용 (정상)
+                    // gameSpeed 5x: 페널티 70% 적용
+                    // gameSpeed 10x: 페널티 55% 적용
+                    // gameSpeed 20x: 페널티 40% 적용
+                    const speedBoostFactor = Math.min(1.0, 1.0 - (gameSpeed - 1) * 0.03);
+                    staminaPenalty = basePenalty + (1.0 - basePenalty) * (1.0 - speedBoostFactor);
+                    
+                    // 스킬 효과로 페널티 무시/완화
+                    if (horse.effect) {
+                        if (horse.effect.ignoreStaminaPenalty) {
+                            staminaPenalty = 1.0;
+                        } else if (horse.effect.reduceStaminaPenalty) {
+                            const reduction = horse.effect.reduceStaminaPenalty;
+                            staminaPenalty = staminaPenalty + (1.0 - staminaPenalty) * reduction;
+                        }
+                    }
+                    
+                    // 🔍 검증 로그 (첫 번째 말, 스태미나 부족 시)
+                    if (horse.id === 0 && frameCount % 150 === 0 && staminaPercent < 50) {
+                        console.log(`💨 [스태미나 ${staminaPercent.toFixed(1)}%]
+  - 기본 페널티: ${basePenalty.toFixed(2)}x
+  - 배속 완화: ${(1 - speedBoostFactor).toFixed(2)} (배속 ${gameSpeed.toFixed(1)}x)
+  - 최종 페널티: ${staminaPenalty.toFixed(2)}x`);
+                    }
+                    
+                    const effectChance = 0.015 * gameSpeed * horse.effectProbabilityMultiplier * (0.5 + horse.intelligence);
+                    if (!horse.effect && Math.random() < effectChance) {
+                        triggerEffect(horse);
+                    }
+                    
+                    let strategySpeed = 1.0;
+                    
+                    if (raceProgress < 0.25) {
+                        strategySpeed = horse.strategy.earlySpeed;
+                    } else if (raceProgress < 0.50) {
+                        strategySpeed = horse.strategy.midSpeed;
+                    } else if (raceProgress < 0.65) {
+                        strategySpeed = horse.strategy.midLateSpeed;
+                    } else if (raceProgress < 0.90) {
+                        strategySpeed = horse.strategy.lateSpeed;
+                    } else {
+                        strategySpeed = horse.strategy.finalStraightSpeed;
+                    }
+                    
+                    if (hasTwoEscape && horse.strategyKey === '도주' && raceProgress < 0.5) {
+                        strategySpeed *= 1.05;
+                    }
+                    
+                    const position = horse.progress % perimeter;
+                    const onFinalStraight = position >= perimeter * 0.90 && position < trackWidth;
+                    
+                    let spurtBonus = 1.0;
+                    if (onFinalStraight) {
+                        if (!horse.inFinalStraight) {
+                            horse.inFinalStraight = true;
+                        }
+                        spurtBonus = 1.0 + (horse.guts * 0.3);
+                    } else {
+                        horse.inFinalStraight = false;
+                    }
+                    
+                    let terrainMultiplier = 1.0;
+                    for (let zone of terrainZones) {
+                        if (horse.progress >= zone.start && horse.progress <= zone.end) {
+                            if (zone.type === 'hill') {
+                                const powerBonus = horse.power * 0.5;
+                                terrainMultiplier = zone.multiplier + powerBonus;
+                            } else if (zone.type === 'downhill') {
+                                const powerBonus = horse.power * 0.3;
+                                terrainMultiplier = zone.multiplier + powerBonus;
+                            }
+                            break;
+                        }
+                    }
+                    
+                    let currentSpeed = horse.baseSpeed * gameSpeed * strategySpeed * terrainMultiplier * staminaPenalty * spurtBonus * crowdPenalty;
+                    
+                    // 🔍 첫 번째 말의 속도 상세 로그 (100프레임마다)
+                    if (horse.id === 0 && frameCount % 100 === 0) {
+                        console.log(`🐴 [${horse.name}] 속도 계산:
+  - baseSpeed: ${horse.baseSpeed.toFixed(2)}
+  - gameSpeed: ${gameSpeed.toFixed(2)} ⭐
+  - strategySpeed: ${strategySpeed.toFixed(2)}
+  - terrainMultiplier: ${terrainMultiplier.toFixed(2)}
+  - staminaPenalty: ${staminaPenalty.toFixed(2)}
+  - 최종 속도: ${currentSpeed.toFixed(2)}`);
+                    }
+                    
+                    // 특수효과 적용
+                    if (horse.effect && horse.effect.speedMultiplier) {
+                        const beforeSpeed = currentSpeed;
+                        currentSpeed *= horse.effect.speedMultiplier;
+                        
+                        if (!horse.effect.logged) {
+                            console.log(`[${horse.name} | ${horse.strategyKey}] 스킬: ${horse.effect.name} | 속도: ${beforeSpeed.toFixed(2)} → ${currentSpeed.toFixed(2)}`);
+                            horse.effect.logged = true;
+                        }
+                    }
+                    
+                    horse.progress += currentSpeed;
+                    
+                    const newPos = getPositionFromProgress(horse.progress % perimeter, trackWidth, trackHeight);
+                    horse.position = newPos;
+                    
+                    const horseEl = document.getElementById(`horse-${horse.id}`);
+                    horseEl.style.left = newPos.x + 'px';
+                    horseEl.style.top = newPos.y + 'px';
+                    
+                    const staminaBar = document.getElementById(`stamina-${horse.id}`);
+                    if (staminaBar) {
+                        staminaBar.style.width = staminaPercent + '%';
+                        staminaBar.className = 'stamina-fill';
+                        if (staminaPercent < 20) {
+                            staminaBar.classList.add('critical');
+                        } else if (staminaPercent < 40) {
+                            staminaBar.classList.add('low');
+                        }
+                    }
+                    
+                    if (horse.progress >= perimeter) {
+                        horse.finished = true;
+                        finishedCount++;
+                        horse.rank = finishedCount;
+                        horseEl.style.filter = 'brightness(1.5)';
+                    }
+                });
+                
+                updateRankings();
+                
+                if (finishedCount === horses.length) {
+                    endRace();
+                }
+            }, 50);
+        }
+
+        function updateRankings() {
+            const sortedHorses = [...horses].sort((a, b) => {
+                if (a.finished && !b.finished) return -1;
+                if (!a.finished && b.finished) return 1;
+                if (a.finished && b.finished) return a.rank - b.rank;
+                return b.progress - a.progress;
+            });
+            
+            sortedHorses.forEach((horse, index) => {
+                const horseEl = document.getElementById(`horse-${horse.id}`);
+                const rankEl = horseEl?.querySelector('.rank-indicator');
+                if (rankEl) {
+                    safeSetText(rankEl, `${index + 1}위`);
+                }
+            });
+        }
+
+        function triggerEffect(horse) {
+            const availableEffects = effects.filter(e => {
+                if (e.requiredStrategy && e.requiredStrategy !== horse.strategyKey) {
+                    return false;
+                }
+                return Math.random() < e.probability;
+            });
+            
+            if (availableEffects.length === 0) return;
+            
+            const effect = availableEffects[Math.floor(Math.random() * availableEffects.length)];
+            
+            if (effect.type === 'stamina') {
+                const beforeStamina = horse.stamina;
+                horse.stamina = Math.min(horse.maxStamina, horse.stamina + effect.staminaRecover);
+                
+                console.log(`[${horse.name}] ${effect.name}: ${beforeStamina.toFixed(1)} → ${horse.stamina.toFixed(1)}`);
+                showEffectPopup(`${horse.name}: ${effect.name}`, horse.color);
+                return;
+            }
+            
+            horse.effect = effect;
+            
+            showEffectPopup(`${horse.name}: ${effect.name}`, horse.color);
+            
+            const horseEl = document.getElementById(`horse-${horse.id}`);
+            if (effect.speedMultiplier > 1.5) {
+                horseEl.style.animation = 'speed-boost 0.5s ease-in-out 4';
+            }
+            
+            if (effect.duration) {
+                setTimeout(() => {
+                    horse.effect = null;
+                    horseEl.style.animation = '';
+                }, effect.duration);
+            }
+        }
+
+        function showEffectPopup(message, color) {
+            const popup = document.createElement('div');
+            popup.className = 'effect-popup';
+            safeSetText(popup, message);
+            popup.style.background = `linear-gradient(135deg, ${color}, var(--accent))`;
+            document.body.appendChild(popup);
+            
+            setTimeout(() => popup.remove(), 1500);
+        }
+
+        function endRace() {
+            clearInterval(gameInterval);
+            
+            // 🔍 최종 통계
+            console.log(`🏁 [레이스 종료]
+  - 최종 속도: ${gameSpeed.toFixed(1)}x
+  - 완주한 말: ${horses.filter(h => h.finished).length}/${horses.length}
+  - 우승: ${horses.find(h => h.rank === 1)?.name}
+  - 꼴등: ${horses.find(h => h.rank === horses.length)?.name}`);
+            
+            setTimeout(() => {
+                document.querySelector('.game-screen').classList.remove('active');
+                document.querySelector('.result-screen').classList.add('active');
+                displayResults();
+            }, 1500);
+        }
+
+        function displayResults() {
+            const sortedHorses = [...horses].sort((a, b) => a.rank - b.rank);
+            
+            const loser = sortedHorses[sortedHorses.length - 1];
+            safeSetText(document.getElementById('loserEmoji'), loser.emoji);
+            safeSetText(document.getElementById('loserNameResult'), loser.name);
+            
+            const rankingList = document.getElementById('rankingList');
+            rankingList.innerHTML = '<h3 style="margin-bottom: 20px;">📊 최종 순위</h3>';
+            
+            const rankEmojis = ['🥇', '🥈', '🥉'];
+            
+            sortedHorses.forEach((horse, index) => {
+                const item = document.createElement('div');
+                item.className = 'ranking-item';
+                
+                const rankNumber = document.createElement('div');
+                rankNumber.className = 'rank-number-result';
+                safeSetText(rankNumber, rankEmojis[index] || `${index + 1}위`);
+                
+                const emoji = document.createElement('div');
+                emoji.style.fontSize = '2em';
+                safeSetText(emoji, horse.emoji);
+                
+                const info = document.createElement('div');
+                info.style.flex = '1';
+                
+                const nameDiv = document.createElement('div');
+                nameDiv.style.fontSize = '1.2em';
+                safeSetText(nameDiv, horse.name);
+                
+                const detailDiv = document.createElement('div');
+                detailDiv.style.fontSize = '0.9em';
+                detailDiv.style.color = '#666';
+                const staminaPercent = ((horse.stamina / horse.maxStamina) * 100).toFixed(1);
+                safeSetText(detailDiv, 
+                    `${horse.strategy.name} | 스태미나: ${staminaPercent}% | 소모율: ${horse.strategy.staminaDrainMultiplier}배${horse.isLastLoser ? ' 🎁' : ''}`
+                );
+                
+                info.appendChild(nameDiv);
+                info.appendChild(detailDiv);
+                
+                item.appendChild(rankNumber);
+                item.appendChild(emoji);
+                item.appendChild(info);
+                
+                rankingList.appendChild(item);
+            });
+        }
+
+        function resetGame() {
+            document.querySelector('.result-screen').classList.remove('active');
+            document.querySelector('.setup-screen').classList.add('active');
+            horses = [];
+        }
+    </script>
+</body>
+</html>
